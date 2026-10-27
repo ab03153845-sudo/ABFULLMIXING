@@ -1,0 +1,36 @@
+name: Build AQ Vocal Studio VST3
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Download and Install JUCE Dependency
+      run: |
+        git clone --branch 7.0.9 https://github.com/juce-framework/JUCE.git JUCE_DIR
+      shell: pwsh
+
+    - name: Configure CMake
+      run: |
+        cmake -B build -G "Visual Studio 17 2022" -A x64 -DJUCE_ROOT_DIR=./JUCE_DIR
+      shell: cmd
+
+    - name: Build VST3 Plugin
+      run: |
+        cmake --build build --config Release
+      shell: cmd
+
+    - name: Upload VST3 Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: AQVocalStudio-Windows-VST3
+        path: build/AQVocalStudio_artefacts/Release/VST3/
